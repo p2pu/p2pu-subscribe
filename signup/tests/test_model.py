@@ -52,7 +52,7 @@ class SimpleTest(TestCase):
         self.assertEqual(len(signup_models.get_signups('test-scope')), 4)
 
 
-    def test_get_signups_for_sequence(self):
+    def test_get_signups_for_scope(self):
         signup_models.create_or_update_signup('user1@mail.com', 'scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
         signup_models.create_or_update_signup('user1@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
         signup_models.create_or_update_signup('user2@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
