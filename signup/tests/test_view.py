@@ -13,18 +13,26 @@ import math
 
 from signup import models as signup_models
 from signup import randata
+from signup.db import SignupScope
 
 class ViewTest(TestCase):
 
     SIGNUP_DATA = {
         'email': 'dirk@mail.com',
-        'scope': 'scope',
+        'scope': 'test-scope',
         'timezone': 'Africa/Johannesburg',
         'groupRadios': 'true', 
         'styleRadios': 'try', 
         'expertiseRadios': 'think',
         'csrfmiddlewaretoken': '123'
     }
+
+    def setUp(self):
+        scope = SignupScope()
+        scope.scope_name = 'test-scope'
+        scope.send_welcome_email = True
+        scope.confirm_email = True
+        scope.save()
 
 
     def test_signup_view(self):
@@ -37,10 +45,20 @@ class ViewTest(TestCase):
         c = Client()
         api_data = {
             'email': 'test@mail.com',
-            'scope': 'test',
+            'scope': 'test-scope',
             'locations': ['location1', 'location2'],
         }
         resp = c.post('/api/signup/', api_data)
         self.assertEqual(resp.status_code, 200)
 
+
+    def test_wrong_scope(self):
+        c = Client()
+        api_data = {
+            'email': 'test@mail.com',
+            'scope': 'test-non-existant-scope',
+            'locations': ['location1', 'location2'],
+        }
+        resp = c.post('/api/signup/', api_data)
+        self.assertEqual(resp.status_code, 400)
 

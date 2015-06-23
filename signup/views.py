@@ -35,16 +35,19 @@ def signup_ajax( request ):
     form = SignupForm(request.POST)
 
     if not form.is_valid():
-        return http.HttpResponse(400)
+        return http.HttpResponse(status=400)
 
     email = form.cleaned_data['email']
     scope = form.cleaned_data['scope']
     signup_questions = request.POST.dict()
     del signup_questions['email']
     del signup_questions['scope']
+    try:
+        signup_model.create_or_update_signup(email, scope, signup_questions )
+    except Exception as e:
+        return http.HttpResponse(status=400)
 
-    signup_model.create_or_update_signup(email, scope, signup_questions )
-    response = http.HttpResponse(200)
+    response = http.HttpResponse(status=200)
     response['Access-Control-Allow-Origin'] = '*'
     response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
     response['Access-Control-Allow-Headers'] =  '*'

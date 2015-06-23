@@ -5,6 +5,7 @@ import math
 
 from signup import models as signup_models
 from signup import randata
+from signup.db import SignupScope
 
 class SimpleTest(TestCase):
 
@@ -14,6 +15,16 @@ class SimpleTest(TestCase):
             'test-scope',
             {'q1':'a1', 'q2':'a2', 'q3':'a3'}
         ]
+        scope = SignupScope()
+        scope.scope_name = 'test-scope'
+        scope.send_welcome_email = True
+        scope.confirm_email = True
+        scope.save()
+        scope2 = SignupScope()
+        scope2.scope_name = 'test-scope-2'
+        scope2.send_welcome_email = True
+        scope2.confirm_email = True
+        scope2.save()
 
 
     def test_create_signup(self):
@@ -53,18 +64,18 @@ class SimpleTest(TestCase):
 
 
     def test_get_signups_for_scope(self):
-        signup_models.create_or_update_signup('user1@mail.com', 'scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
-        signup_models.create_or_update_signup('user1@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
-        signup_models.create_or_update_signup('user2@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
-        signup_models.create_or_update_signup('user3@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user1@mail.com', 'test-scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
+        signup_models.create_or_update_signup('user1@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user2@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user3@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
         
-        signup_models.create_or_update_signup('user3@mail.com', 'scope-2', {'q1':'ar1'})
-        signup_models.create_or_update_signup('user4@mail.com', 'scope-2', {'q1':'ar1'})
-        signup_models.create_or_update_signup('user5@mail.com', 'scope-2', {'q1':'ar1'})
-        signup_models.create_or_update_signup('user6@mail.com', 'scope-2', {'q1':'ar1'})
+        signup_models.create_or_update_signup('user3@mail.com', 'test-scope-2', {'q1':'ar1'})
+        signup_models.create_or_update_signup('user4@mail.com', 'test-scope-2', {'q1':'ar1'})
+        signup_models.create_or_update_signup('user5@mail.com', 'test-scope-2', {'q1':'ar1'})
+        signup_models.create_or_update_signup('user6@mail.com', 'test-scope-2', {'q1':'ar1'})
 
-        self.assertEqual(len(signup_models.get_signups('scope')), 3)
-        self.assertEqual(len(signup_models.get_signups('scope-2')), 4)
+        self.assertEqual(len(signup_models.get_signups('test-scope')), 3)
+        self.assertEqual(len(signup_models.get_signups('test-scope-2')), 4)
 
 
 #    def test_handle_new_signups(self, add_list_member, delete_all_unsubscribes):
@@ -97,29 +108,29 @@ class SimpleTest(TestCase):
 
 
     def test_delete_signup(self):
-        signup_models.create_or_update_signup('user1@mail.com', 'scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
-        signup_models.create_or_update_signup('user1@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
-        signup_models.create_or_update_signup('user2@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
-        signup_models.create_or_update_signup('user3@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
-        signup_models.create_or_update_signup('user4@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user1@mail.com', 'test-scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
+        signup_models.create_or_update_signup('user1@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user2@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user3@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
+        signup_models.create_or_update_signup('user4@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
 
-        self.assertEqual(len(signup_models.get_signups('scope')), 4)
-        new_signups = signup_models.get_signups('scope')
+        self.assertEqual(len(signup_models.get_signups('test-scope')), 4)
+        new_signups = signup_models.get_signups('test-scope')
         self.assertIn('user3@mail.com', [s['email'] for s in new_signups])
 
-        signup_models.delete_signup('user3@mail.com', 'scope')
+        signup_models.delete_signup('user3@mail.com', 'test-scope')
 
-        signups = signup_models.get_signups('scope')
+        signups = signup_models.get_signups('test-scope')
         self.assertEqual(len(signups), 3)
         self.assertNotIn('user3@mail.com', [s['email'] for s in signups])
 
-        signup_models.create_or_update_signup('user3@mail.com', 'scope', {'q1':'ar1', 'q2':'ar2'})
-        self.assertEqual(len(signup_models.get_signups('scope')), 4)
-        signups = signup_models.get_signups('scope')
+        signup_models.create_or_update_signup('user3@mail.com', 'test-scope', {'q1':'ar1', 'q2':'ar2'})
+        self.assertEqual(len(signup_models.get_signups('test-scope')), 4)
+        signups = signup_models.get_signups('test-scope')
         self.assertIn('user3@mail.com', [s['email'] for s in signups])
 
 
     def test_case_insensitve_signup(self):
-        signup_models.create_or_update_signup('thisisauser@mail.com', 'scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
-        signup = signup_models.get_signup('ThisIsAUser@mail.COM', 'scope')
+        signup_models.create_or_update_signup('thisisauser@mail.com', 'test-scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
+        signup = signup_models.get_signup('ThisIsAUser@mail.COM', 'test-scope')
         self.assertEquals(signup['email'], 'thisisauser@mail.com')
