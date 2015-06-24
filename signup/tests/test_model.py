@@ -1,13 +1,14 @@
 from django.test import TestCase
+from django.core import mail
 
 from mock import patch
 import math
 
 from signup import models as signup_models
 from signup import randata
-from signup.db import SignupScope
+from signup.db import SignupScope, EmailTemplate
 
-class SimpleTest(TestCase):
+class ModelTest(TestCase):
 
     def setUp(self):
         self.signup_data = [
@@ -15,15 +16,22 @@ class SimpleTest(TestCase):
             'test-scope',
             {'q1':'a1', 'q2':'a2', 'q3':'a3'}
         ]
+        email_template = EmailTemplate()
+        email_template.subject = 'Thanks for signing up'
+        email_template.text_body = 'Thanks for signing up'
+        email_template.html_body = 'Thanks for signing up'
+        email_template.save()
+
         scope = SignupScope()
         scope.scope_name = 'test-scope'
         scope.send_welcome_email = True
         scope.confirm_email = True
+        scope.email_template = email_template
         scope.save()
         scope2 = SignupScope()
         scope2.scope_name = 'test-scope-2'
-        scope2.send_welcome_email = True
-        scope2.confirm_email = True
+        scope2.send_welcome_email = False
+        scope2.confirm_email = False
         scope2.save()
 
 
@@ -39,6 +47,15 @@ class SimpleTest(TestCase):
         self.assertEqual(signup['questions']['q3'], 'a3')
         self.assertIn('created_at', signup)
         self.assertIn('updated_at', signup)
+        self.assertEqual(len(mail.outbox), 1)
+
+
+    def test_create_signup_in_nonexistent_scope(self):
+        with self.assertRaises(Exception):
+            signup_models.create_signup('bob@mail.net', '123456789', {})
+
+        with self.assertRaises(Exception):
+            signup = signup_models.get_signup('bob@mail.net', '123456789')
 
 
     def test_update_signup(self):

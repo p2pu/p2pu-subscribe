@@ -5,7 +5,7 @@ import random
 import string
 
 from signup import db
-#from signup import emails
+from signup.emails import send_welcome_email
 
 
 def _signup2json( signup_db ):
@@ -31,10 +31,10 @@ def create_signup( email, scope_name, questions ):
         questions=json.dumps(questions),
     )
     signup.save()
+    signup_dict = _signup2json(signup)
     if scope.send_welcome_email:
-        # TODO Send welcome email
-        pass
-    return _signup2json(signup)
+        send_welcome_email(signup_dict)
+    return signup_dict
 
 
 def update_signup( email, scope, questions ):
