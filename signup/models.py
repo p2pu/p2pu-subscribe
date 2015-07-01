@@ -5,7 +5,31 @@ import random
 import string
 
 from signup import db
-from signup.emails import send_welcome_email
+from signup.tasks import send_welcome_email
+
+
+def create_signup_scope(scope_name, send_welcome_email, confirm_email, email_subject, email_text, email_html):
+    # Check if send_welcome_email is true and if we hae an email template supplied
+    email_template = None
+    
+    if send_welcome_email:
+        email_template = db.EmailTemplate()
+        if email_subject:
+            email_template.subject = email_subject
+        # TODO load default template 
+        if email_text:
+            email_template.text_body = email_text
+        if email_html:
+            email_template.html_body = email_html
+        email_template.save()
+
+    scope_db = db.SignupScope(
+        scope_name = scope_name,
+        send_welcome_email = send_welcome_email,
+        confirm_email = confirm_email,
+        email_template = email_template
+    )
+    scope_db.save()
 
 
 def _signup2json( signup_db ):
@@ -33,7 +57,7 @@ def create_signup( email, scope_name, questions ):
     signup.save()
     signup_dict = _signup2json(signup)
     if scope.send_welcome_email:
-        send_welcome_email(signup_dict)
+        send_welcome_email.delay(signup_dict, 10)
     return signup_dict
 
 

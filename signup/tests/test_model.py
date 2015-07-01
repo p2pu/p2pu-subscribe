@@ -34,6 +34,13 @@ class ModelTest(TestCase):
         scope2.confirm_email = False
         scope2.save()
 
+        self.patch1 = patch('signup.models.send_welcome_email.delay')
+        self.send_welcome_email = self.patch1.start()
+
+
+    def tearDown(self):
+        self.patch1.stop()
+
 
     def test_create_signup(self):
         """
@@ -47,7 +54,7 @@ class ModelTest(TestCase):
         self.assertEqual(signup['questions']['q3'], 'a3')
         self.assertIn('created_at', signup)
         self.assertIn('updated_at', signup)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(self.send_welcome_email.called)
 
 
     def test_create_signup_in_nonexistent_scope(self):
@@ -151,3 +158,10 @@ class ModelTest(TestCase):
         signup_models.create_or_update_signup('thisisauser@mail.com', 'test-scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
         signup = signup_models.get_signup('ThisIsAUser@mail.COM', 'test-scope')
         self.assertEquals(signup['email'], 'thisisauser@mail.com')
+
+    def test_send_welcome_email(self):
+        from signup import emails
+        signup = signup_models.create_or_update_signup('thisisauser@mail.com', 'test-scope', {'q1':'a1', 'q2':'a2', 'q3':'a3'})
+        emails.send_welcome_email(signup)
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(mail.outbox[0].subject, 'Thanks for signing up')

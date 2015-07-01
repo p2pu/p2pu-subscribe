@@ -46,13 +46,16 @@ class ViewTest(TestCase):
         scope.save()
 
 
-    def test_signup_view(self):
+    @patch('signup.models.send_welcome_email.delay')
+    def test_signup_view(self, send_welcome_email):
         c = Client()
         resp = c.post('/signup/', self.SIGNUP_DATA)
         self.assertRedirects(resp, '/success/')
+        self.assertTrue(send_welcome_email.called)
 
 
-    def test_signup_api(self):
+    @patch('signup.models.send_welcome_email.delay')
+    def test_signup_api(self, send_welcome_email):
         c = Client()
         api_data = {
             'email': 'test@mail.com',
@@ -61,8 +64,7 @@ class ViewTest(TestCase):
         }
         resp = c.post('/api/signup/', api_data)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, self.email_template.subject)
+        self.assertTrue(send_welcome_email.called)
 
 
     def test_wrong_scope(self):
