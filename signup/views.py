@@ -8,7 +8,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
 
+import logging
 import json
+
+logger = logging.getLogger(__name__)
 
 from forms import SignupForm
 from signup import models as signup_model
@@ -36,16 +39,17 @@ def signup_ajax( request ):
 
     if not form.is_valid():
         return http.HttpResponse(status=400)
-
     email = form.cleaned_data['email']
     scope = form.cleaned_data['scope']
     signup_questions = request.POST.dict()
     del signup_questions['email']
     del signup_questions['scope']
-    #try: TODO: should need this try catch block or make exception specific
-    signup_model.create_or_update_signup(email, scope, signup_questions )
-    #except Exception as e:
-    #    return http.HttpResponse(status=400)
+    #TODO: make exception specific - only legit exception should be wrong scope
+    try: 
+        signup_model.create_or_update_signup(email, scope, signup_questions )
+    except Exception as ex:
+        logger.debug(unicode(ex))
+        return http.HttpResponse(status=400)
 
     response = http.HttpResponse(status=200)
     response['Access-Control-Allow-Origin'] = '*'

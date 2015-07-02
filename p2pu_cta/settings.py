@@ -130,21 +130,10 @@ import sys
 LOGGING = {
     'version': 1,
     'dissable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%Y-%m-%d %H:%M:%S",
-        },
-        'simple': {
-            'format': "%(levelname)s %(message)s",
-        },
-    },
     'handlers': {
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-            'formatter': 'simple',
         },
         'mail_admins': {
             'level': 'ERROR',
