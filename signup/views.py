@@ -42,10 +42,10 @@ def signup_ajax( request ):
     signup_questions = request.POST.dict()
     del signup_questions['email']
     del signup_questions['scope']
-    try:
-        signup_model.create_or_update_signup(email, scope, signup_questions )
-    except Exception as e:
-        return http.HttpResponse(status=400)
+    #try: TODO: should need this try catch block or make exception specific
+    signup_model.create_or_update_signup(email, scope, signup_questions )
+    #except Exception as e:
+    #    return http.HttpResponse(status=400)
 
     response = http.HttpResponse(status=200)
     response['Access-Control-Allow-Origin'] = '*'
