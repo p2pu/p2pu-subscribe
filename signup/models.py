@@ -57,7 +57,7 @@ def create_signup( email, scope_name, questions ):
     signup.save()
     signup_dict = _signup2json(signup)
     if scope.send_welcome_email:
-        send_welcome_email.delay(signup_dict, 10)
+        send_welcome_email.delay(signup_dict)
     return signup_dict
 
 
