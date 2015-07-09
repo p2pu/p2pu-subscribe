@@ -3,6 +3,7 @@ from django.utils import timezone
 import json
 import random
 import string
+import datetime
 
 from signup import db
 from signup.tasks import send_welcome_email
@@ -104,18 +105,8 @@ def get_signups( scope ):
     return [_signup2json(signup) for signup in signups]
 
 
-#   def get_new_signups( ):
-#       """ get signups where the welcome email hasn't been sent yet """
-#       signups = db.UserSignup.objects.filter(tasks_handled_at__isnull=True, deleted_at__isnull=True)
-#       return [_signup2json(signup) for signup in signups]
-
-
-#   def handle_new_signups( ):
-#       """ Send welcome email to new users.
-#           Add them to a general mailing list. 
-#           Update db when done. """
-#       signups = db.UserSignup.objects.filter(tasks_handled_at__isnull=True, deleted_at__isnull=True)[:500]
-#       while len(signups):
-#           emails.send_welcome_emails([signup.email for signup in signups])
-#           db.UserSignup.objects.filter(id__in=signups.values('id')).update(tasks_handled_at=timezone.now())
-#           signups = db.UserSignup.objects.filter(tasks_handled_at__isnull=True, deleted_at__isnull=True)[:500]
+def get_previous_week_signups(scope):
+    today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today - datetime.timedelta(days=today.weekday()+7)
+    signups_db = db.UserSignup.objects.filter(created_at__gte=week_start, created_at__lt=week_start + datetime.timedelta(days=7), scope__scope_name=scope)
+    return [ _signup2json(signup) for signup in signups_db ]

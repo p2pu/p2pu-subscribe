@@ -21,3 +21,19 @@ def send_welcome_email(signup):
         fail_silently=False,
         html_message=html_body
     )
+
+
+def send_weekly_signup_digest(scope, signups):
+    context = {'scope': scope, 'signups': signups}
+    subject = render_to_string('signup/weekly_digest_subject.txt', context).strip()
+    text_body = render_to_string('signup/weekly_digest.txt', context).strip()
+    html_body = render_to_string('signup/weekly_digest.html', context).strip()
+
+    send_mail(
+        subject,
+        text_body,
+        settings.DEFAULT_FROM_EMAIL,
+        [ a[1] for a in settings.ADMINS],
+        fail_silently=False,
+        html_message=html_body
+    )

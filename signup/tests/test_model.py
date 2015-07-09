@@ -3,10 +3,11 @@ from django.core import mail
 
 from mock import patch
 import math
+import datetime
 
 from signup import models as signup_models
 from signup import randata
-from signup.db import SignupScope, EmailTemplate
+from signup.db import SignupScope, EmailTemplate, UserSignup
 
 class ModelTest(TestCase):
 
@@ -165,3 +166,46 @@ class ModelTest(TestCase):
         emails.send_welcome_email(signup)
         self.assertEquals(len(mail.outbox), 1)
         self.assertEquals(mail.outbox[0].subject, 'Thanks for signing up')
+
+    def test_getting_previous_week_signups(self):
+        signup_models.create_signup('mail1@mail.com', 'test-scope', {})
+        signup_models.create_signup('mail2@mail.com', 'test-scope', {})
+        signup_models.create_signup('mail3@mail.com', 'test-scope', {})
+        signup_models.create_signup('mail4@mail.com', 'test-scope', {})
+        signup_models.create_signup('mail5@mail.com', 'test-scope', {})
+        signup_models.create_signup('mail6@mail.com', 'test-scope', {})
+
+        # Change 2 signup to a week ago
+        s2 = UserSignup.objects.get(email='mail2@mail.com')
+        s2.created_at = s2.created_at - datetime.timedelta(days=7)
+        s2.save()
+        
+        s3 = UserSignup.objects.get(email='mail3@mail.com')
+        s3.created_at = s3.created_at - datetime.timedelta(days=7)
+        s3.save()
+
+        # Change 1 signup to two weeks ago
+        s4 = UserSignup.objects.get(email='mail4@mail.com')
+        s4.created_at = s4.created_at - datetime.timedelta(days=14)
+        s4.save()
+
+        # Change 1 signup to the start of the week
+        s5 = UserSignup.objects.get(email='mail5@mail.com')
+        s5.created_at = s5.created_at.replace(hour=0, minute=0, second=0, microsecond=0)
+        s5.created_at = s5.created_at - datetime.timedelta(days=s5.created_at.weekday())
+        s5.save()
+
+        # Change 1 signup to start of previous week 
+        s6 = UserSignup.objects.get(email='mail6@mail.com')
+        s6.created_at = s6.created_at.replace(hour=0, minute=0, second=0, microsecond=0)
+        s6.created_at = s6.created_at - datetime.timedelta(days=s6.created_at.weekday()+7)
+        s6.save()
+
+        # At this point the follow signups should be part of the previous weeks signups:
+        # ['mail2@mail.com', 'mail3@mail.com', 'mail6@mail.com']
+        emails = [ s['email'] for s in signup_models.get_previous_week_signups('test-scope')]
+        for email in['mail2@mail.com', 'mail3@mail.com', 'mail6@mail.com']:
+            self.assertIn(email, emails)
+
+
+
