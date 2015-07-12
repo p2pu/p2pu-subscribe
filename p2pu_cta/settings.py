@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
+from __future__ import absolute_import
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -151,6 +152,16 @@ LOGGING = {
 
 ####### Celery config #######
 BROKER_URL = os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost//')
+
+from celery.schedules import crontab
+
+CELERYBEAT_SCHEDULE = {
+    # Executes every Monday morning at 7:30 A.M
+    'send-weekly-digest': {
+        'task': 'signup.periodic_tasks.send_weekly_digest',
+        'schedule': crontab(hour=12, minute=0, day_of_week='tuesday'),
+    },
+}
 
 #: Only add pickle to this list if your broker is secured
 #: from unwanted access (see userguide/security.html)

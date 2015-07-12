@@ -1,11 +1,11 @@
-This week {{ signups|length }} new people signed up to {{ scope }}.
+This week {{ signups|length }} new {{ signups|length|pluralize:"person,people" }} signed up to {{ scope }}.
 
 {% spaceless %}
-    email, {{ signups.0.questions.keys|join:',' }}
+    Date created, Email, {{ signups.0.questions.keys|join:',' }}
 {% endspaceless %}
 
 {% spaceless %}
     {% for signup in signups %}
-        {{ signup.email }}, {{ signup.questions.values|join:',' }}
+        {{ signup.created_at|date:"P D d M Y" }}, {{ signup.email }}, {{ signup.questions.values|join:',' }}
     {% endfor %}
 {% endspaceless %}

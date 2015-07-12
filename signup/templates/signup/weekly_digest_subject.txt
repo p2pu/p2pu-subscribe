@@ -1,1 +1,1 @@
-{{ signups|length }} new signup{{ signups|length|pluralize }} for {{week_start}}.
+{{ signups|length }} new signup{{ signups|length|pluralize }} for {{ scope }}.

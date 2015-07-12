@@ -1,0 +1,26 @@
+{% extends 'email_base.html' %}
+
+{% block body %}
+
+<p>This week {{ signups|length }} new {{ signups|length|pluralize:"person,people" }} signed up to {{ scope }}.</p>
+
+<table>
+    <thead>
+        <tr>
+            <td>Date created</td>
+            <td>Email</td>
+            <td>{{ signups.0.questions.keys|join:'</td><td>' }}</td>
+        </tr>
+    <thead>
+
+    {% for signup in signups %}
+        <tr>
+            <td>{{ signup.created_at|date:"P D d M Y" }}</td>
+            <td>{{ signup.email }}</td>
+            <td>{{ signup.questions.values|join:'</td><td>' }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
