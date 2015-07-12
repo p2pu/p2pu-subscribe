@@ -67,8 +67,6 @@ def success(request):
 
 
 def count(request, scope):
-    scope = int(scope)
-
     context = {
         'signup_count': str(len(signup_model.get_signups(scope))),
         'scope': scope
