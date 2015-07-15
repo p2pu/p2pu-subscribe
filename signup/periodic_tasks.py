@@ -6,7 +6,7 @@ from signup.models import get_previous_week_signups
 from signup.db import SignupScope
 
 
-#@shared_task
+@shared_task
 def send_weekly_digest():
     for scope in SignupScope.objects.all():
         signups = get_previous_week_signups(scope.scope_name)
