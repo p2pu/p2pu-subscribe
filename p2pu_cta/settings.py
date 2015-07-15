@@ -158,8 +158,8 @@ from celery.schedules import crontab
 CELERYBEAT_SCHEDULE = {
     # Executes every Monday morning at 7:30 A.M
     'send-weekly-digest': {
-        'task': 'p2pu_cta.signup.periodic_tasks.send_weekly_digest',
-        'schedule': crontab(hour=22, minute=38, day_of_week='wednesday'),
+        'task': 'signup.tasks.send_weekly_digest',
+        'schedule': crontab(hour=22, minute=52, day_of_week='wednesday'),
     },
 }
 
