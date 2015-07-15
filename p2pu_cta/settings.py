@@ -159,7 +159,7 @@ CELERYBEAT_SCHEDULE = {
     # Executes every Monday morning at 7:30 A.M
     'send-weekly-digest': {
         'task': 'signup.periodic_tasks.send_weekly_digest',
-        'schedule': crontab(hour=2, minute=0, day_of_week='wednesday'),
+        'schedule': crontab(hour=21, minute=35, day_of_week='wednesday'),
     },
 }
 
